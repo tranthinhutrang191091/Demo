@@ -174,7 +174,7 @@ public class UserDAO implements DAOInterface<User> {
 		return user;
 	}
 
-	public User selectByUserName(User t) {
+	private User selectByUserName(User t) {
 		User user = new User();
 		try {
 			// Bước 1: tạo kết nối đến CSDL
@@ -203,7 +203,7 @@ public class UserDAO implements DAOInterface<User> {
 		return user;
 	}
 
-	public User selectByIdStudent(User t) {
+	private User selectByIdStudent(User t) {
 		User user = new User();
 		try {
 			// Bước 1: tạo kết nối đến CSDL
@@ -263,7 +263,7 @@ public class UserDAO implements DAOInterface<User> {
 		return listUser;
 	}
 
-	public boolean login(String userName, String password) {
+	private boolean login(String userName, String password) {
 		boolean result = false;
 		User user = new User();
 		try {

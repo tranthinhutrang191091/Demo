@@ -39,6 +39,9 @@ public class TestSchool {
 //		}
 
 		// School sc = new School("x\" or 1=1; -- ","");
+		JDBCUtil.getConnection();
+        JDBCUtil.printInfo(null);
+		
 		try {
 			// Bước 1: tạo kết nối đến CSDL
 			Connection connection = JDBCUtil.getConnection();
