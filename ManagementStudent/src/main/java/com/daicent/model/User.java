@@ -1,5 +1,8 @@
 package com.daicent.model;
 
+import com.daicent.annotation.UserAnnotation;
+
+@UserAnnotation(idUser = "idUser", userName = "userName",password = "password",idStudent = "idStudent")
 public class User {
 	private int idUser;
 	private String userName;

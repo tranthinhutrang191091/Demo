@@ -1,5 +1,6 @@
 package com.daicent.dao;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -7,7 +8,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.daicent.annotation.UserAnnotation;
 import com.daicent.database.JDBCUtil;
 import com.daicent.model.User;
 
@@ -48,12 +53,26 @@ public class UserReflection {
 
 			}
 			// Bước 2: tạo đối tượng PreparedStatement
-			String sql = "INSERT INTO `student_management`.`user` (`idUser`, `userName`, `password`, `idStudent`) VALUES (?, ?, ?, ?);";
+
+			Class user = User.class;
+			Annotation annotation = user.getAnnotation(UserAnnotation.class);
+			UserAnnotation userAnnotation = null;
+			if (annotation instanceof UserAnnotation) {
+				userAnnotation = (UserAnnotation) annotation;
+			}
+			// INSERT INTO `student_management`.`user` (`idUser`, `userName`, `password`,
+			// `idStudent`) VALUES ('4', 'sfs', 'sdg', '7');
+
+			String sql = "INSERT INTO `student_management`.`user` (" + userAnnotation.idUser() + ","
+					+ userAnnotation.userName() + "," + userAnnotation.password() + "," + userAnnotation.idStudent()
+					+ ") VALUES (?, ?, ?, ?);";
+
 			PreparedStatement preStatemnt = connection.prepareStatement(sql);
 			preStatemnt.setInt(1, idUser);
 			preStatemnt.setString(2, userName);
 			preStatemnt.setString(3, password);
 			preStatemnt.setInt(4, idStudent);
+			System.out.println(preStatemnt.toString());
 			// Bước 3: thực thi câu lệnh sql
 			result = preStatemnt.executeUpdate();
 			// Bước 4: kiểm tra kết quả
@@ -105,13 +124,21 @@ public class UserReflection {
 				}
 
 			}
+			Class user = User.class;
+			Annotation annotation = user.getAnnotation(UserAnnotation.class);
+			UserAnnotation userAnnotation = null;
+			if (annotation instanceof UserAnnotation) {
+				userAnnotation = (UserAnnotation) annotation;
+			}
 			// Bước 2: tạo đối tượng PreparedStatement
-			String sql = "UPDATE `student_management`.`user` SET `password` = ? WHERE (`idUser` = ?);";
+			String sql = "UPDATE `student_management`.`user` SET " + userAnnotation.password() + " = ? WHERE ("
+					+ userAnnotation.idUser() + " = ?);";
 			PreparedStatement preStatemnt = connection.prepareStatement(sql);
-			preStatemnt.setString(1, userName);
+			preStatemnt.setString(1, password);
 			preStatemnt.setInt(2, idUser);
 			// Bước 3: thực thi câu lệnh sql
 			result = preStatemnt.executeUpdate();
+			System.out.println(preStatemnt.toString());
 			// Bước 4: kiểm tra kết quả
 			if (result > 0) {
 				System.out.println("Có " + result + " dòng bị thay đổi! Sửa User thành công!");
@@ -148,8 +175,14 @@ public class UserReflection {
 					idUser = (Integer) f.get(t);
 				}
 			}
+			Class user = User.class;
+			Annotation annotation = user.getAnnotation(UserAnnotation.class);
+			UserAnnotation userAnnotation = null;
+			if (annotation instanceof UserAnnotation) {
+				userAnnotation = (UserAnnotation) annotation;
+			}
 			// Bước 2: tạo đối tượng PreparedStatement
-			String sql = "DELETE FROM `student_management`.`user` WHERE (`idUser` = ?);";
+			String sql = "DELETE FROM `student_management`.`user` WHERE (" + userAnnotation.idUser() + " = ?);";
 			PreparedStatement preStatemnt = connection.prepareStatement(sql);
 			preStatemnt.setInt(1, idUser);
 			// Bước 3: thực thi câu lệnh sql
@@ -173,15 +206,21 @@ public class UserReflection {
 	}
 
 	public ArrayList<User> selectAll() {
-		ArrayList<User> list = new ArrayList<User>();
-		;
+		List<User> list = new ArrayList<User>();
 		try {
 			// Bước 1: tạo kết nối đến CSDL
 			Connection connection = JDBCUtil.getConnection();
 			Class<?> listClass = Class.forName("com.daicent.model.User");
 			Constructor<?> constructors = listClass.getConstructor(int.class, String.class, String.class, int.class);
+			Class user = User.class;
+			Annotation annotation = user.getAnnotation(UserAnnotation.class);
+			UserAnnotation userAnnotation = null;
+			if (annotation instanceof UserAnnotation) {
+				userAnnotation = (UserAnnotation) annotation;
+			}
 			// Bước 2: tạo đối tượng PreparedStatement
-			String sql = "SELECT * FROM student_management.user;";
+			String sql = "SELECT " + userAnnotation.idUser() + "," + userAnnotation.userName() + ","
+					+ userAnnotation.password() + "," + userAnnotation.idStudent() + " FROM student_management.user;";
 			PreparedStatement preStatemnt = connection.prepareStatement(sql);
 			// Bước 3: thực thi câu lệnh sql
 			ResultSet resultSet = preStatemnt.executeQuery();
@@ -192,15 +231,15 @@ public class UserReflection {
 				String userName = resultSet.getString("userName");
 				String password = resultSet.getString("password");
 				int idStudent = resultSet.getInt("idStudent");
-				User user = (User) constructors.newInstance(idUser, userName, password, idStudent);
-				list.add(user);
+				User user0 = (User) constructors.newInstance(idUser, userName, password, idStudent);
+				list.add(user0);
 				count++;
 			}
 			System.out.println("Có " + count + " dòng!");
 			// Bước 5: ngắt kết nối với database
 			JDBCUtil.closeConnection(connection);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Logger.getLogger(UserReflection.class.getName()).log(Level.SEVERE, null, e);
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		} catch (SecurityException e) {
@@ -208,7 +247,7 @@ public class UserReflection {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return list;
+		return (ArrayList<User>) list;
 	}
 
 }
