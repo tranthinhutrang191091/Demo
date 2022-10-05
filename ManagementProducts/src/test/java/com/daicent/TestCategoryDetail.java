@@ -41,9 +41,11 @@ public class TestCategoryDetail {
 //		CategoryDetailDAO.getInstance().infoAll();
 		
 		// select CategoryDetail By IdCategory
-		Category category= new Category(1,"");
-		CategoryDetailDAO.getInstance().selectByIdCategory(category);
+//		Category category= new Category(1,"");
+//		CategoryDetailDAO.getInstance().selectByIdCategory(category);
 		
+		//map
+		CategoryDetailDAO.getInstance().mapCategory();
 		
 	}
 }

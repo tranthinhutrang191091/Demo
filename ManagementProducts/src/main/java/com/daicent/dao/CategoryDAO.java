@@ -6,14 +6,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.daicent.database.JDBCUtil;
 import com.daicent.model.Category;
+import com.daicent.model.CategoryDetail;
 import com.mysql.cj.jdbc.CallableStatement;
 
-public class CategoryDAO implements DAOInterface<Category> {
+public class CategoryDAO  implements DAOInterface<Category> {
 	public static CategoryDAO getInstance() {
 		return new CategoryDAO();
 	}
@@ -133,19 +136,11 @@ public class CategoryDAO implements DAOInterface<Category> {
 			// Bước 3: thực thi câu lệnh sql
 			ResultSet resultSet = preStatemnt.executeQuery();
 			// Bước 4: kiểm tra kết quả
-			int count = 0;
 			while (resultSet.next()) {
 				int idCategory = resultSet.getInt("ID");
 				String nameCategory = resultSet.getString("CategoryName");
 				Category category = new Category(idCategory, nameCategory);
 				listCategory.add(category);
-				count++;
-			}
-			if (count > 0) {
-				System.out.println("There are " + count + " Category!");
-				show((ArrayList<Category>) listCategory);
-			} else {
-				System.out.println("No Category!!");
 			}
 			// Bước 5: ngắt kết nối với database
 			JDBCUtil.closeConnection(connection);
@@ -248,5 +243,5 @@ public class CategoryDAO implements DAOInterface<Category> {
 			System.out.println(category.toString());
 		}
 	}
-
+	
 }

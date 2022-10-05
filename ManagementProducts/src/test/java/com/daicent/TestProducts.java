@@ -1,5 +1,6 @@
 package com.daicent;
 
+import com.daicent.dao.CategoryDetailDAO;
 import com.daicent.dao.ProductsDAO;
 import com.daicent.model.Category;
 import com.daicent.model.CategoryDetail;
@@ -47,9 +48,13 @@ public class TestProducts {
 		// select By Id CategoryDetail
 //		CategoryDetail categoryDetail = new CategoryDetail(1,"",1);
 //		ProductsDAO.getInstance().selectByIdCategoryDetail(categoryDetail);
-		CategoryDetail categoryDetail = new CategoryDetail(17,"",1);
-		ProductsDAO.getInstance().selectByIdCategoryDetail(categoryDetail);
-		
+//		CategoryDetail categoryDetail = new CategoryDetail(17,"",1);
+//		ProductsDAO.getInstance().selectByIdCategoryDetail(categoryDetail);
+//		
+		//map
+//		ProductsDAO.getInstance().mapProductsByCategory();
+//		ProductsDAO.getInstance().mapProductsByCategoryDetail()
+		ProductsDAO.getInstance().mapProducts();
 	}
 	
 }

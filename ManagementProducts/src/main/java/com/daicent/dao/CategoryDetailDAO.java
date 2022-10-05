@@ -6,6 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,7 +17,8 @@ import com.daicent.model.Category;
 import com.daicent.model.CategoryDetail;
 import com.mysql.cj.jdbc.CallableStatement;
 
-public class CategoryDetailDAO implements DAOInterface<CategoryDetail> {
+
+public class CategoryDetailDAO implements DAOInterface<CategoryDetail>  {
 
 	public static CategoryDetailDAO getInstance() {
 		return new CategoryDetailDAO();
@@ -306,20 +310,12 @@ public class CategoryDetailDAO implements DAOInterface<CategoryDetail> {
 			// Bước 3: thực thi câu lệnh sql
 			ResultSet resultSet = preStatemnt.executeQuery();
 			// Bước 4: kiểm tra kết quả
-			int count = 0;
 			while (resultSet.next()) {
 				int idCategoryDetail = resultSet.getInt("idCategoryDetail");
 				String nameCategoryDetail = resultSet.getString("nameCategoryDetail");
 				int idCategory = resultSet.getInt("idCategory");
 				CategoryDetail categoryDetail = new CategoryDetail(idCategoryDetail, nameCategoryDetail, idCategory);
 				lisCategoryDetails.add(categoryDetail);
-				count++;
-			}
-			if (count > 0) {
-				System.out.println("There are " + count + " CategoryDetail!");
-				show((ArrayList<CategoryDetail>) lisCategoryDetails);
-			} else {
-				System.out.println("No CategoryDetail!!");
 			}
 			// Bước 5: ngắt kết nối với database
 			JDBCUtil.closeConnection(connection);
@@ -329,6 +325,23 @@ public class CategoryDetailDAO implements DAOInterface<CategoryDetail> {
 		return (ArrayList<CategoryDetail>) lisCategoryDetails;
 	}
 
+	public TreeMap<Category, ArrayList<CategoryDetail>> mapCategory(){
+		Map <Category, ArrayList<CategoryDetail>> mapCategory = new TreeMap<Category, ArrayList<CategoryDetail>> ();
+		ArrayList<Category> listCategories = CategoryDAO.getInstance().selectAll();
+		for(Category category: listCategories) {
+			ArrayList<CategoryDetail> listCategoryDetails= selectByIdCategory(category);
+			mapCategory.put(category, listCategoryDetails);
+		}
+//			Set<Category> setCategory = map.keySet();
+//	        for (Category key : setCategory) {
+//	        	System.out.println(key.toString());
+//	        	ArrayList<CategoryDetail> list = map.get(key);
+//	           for(CategoryDetail cd:list) {
+//	        	   System.out.println(cd.toString());
+//	           }
+//	        }
+		return (TreeMap<Category, ArrayList<CategoryDetail>>) mapCategory;
+	}
 	public void infoAll() {
 		try {
 			// Bước 1: tạo kết nối đến CSDL
@@ -353,4 +366,5 @@ public class CategoryDetailDAO implements DAOInterface<CategoryDetail> {
 			Logger.getLogger(CategoryDetailDAO.class.getName()).log(Level.SEVERE, null, e);
 		}
 	}
+
 }
