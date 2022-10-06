@@ -151,20 +151,12 @@ public class CategoryDetailDAO implements DAOInterface<CategoryDetail>  {
 			// Bước 3: thực thi câu lệnh sql
 			ResultSet resultSet = preStatemnt.executeQuery();
 			// Bước 4: kiểm tra kết quả
-			int count = 0;
 			while (resultSet.next()) {
 				int idCategoryDetail = resultSet.getInt("idCategoryDetail");
 				String nameCategoryDetail = resultSet.getString("nameCategoryDetail");
 				int idCategory = resultSet.getInt("idCategory");
 				CategoryDetail categoryDetail = new CategoryDetail(idCategoryDetail, nameCategoryDetail, idCategory);
 				lisCategoryDetails.add(categoryDetail);
-				count++;
-			}
-			if (count > 0) {
-				System.out.println("There are " + count + " CategoryDetail!");
-				show((ArrayList<CategoryDetail>) lisCategoryDetails);
-			} else {
-				System.out.println("No CategoryDetail!!");
 			}
 			// Bước 5: ngắt kết nối với database
 			JDBCUtil.closeConnection(connection);

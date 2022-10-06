@@ -174,7 +174,9 @@ public class ProductsDAO implements DAOInterface<Products> {
 		}
 		return (ArrayList<Products>) listProducts;
 	}
-
+	
+	 //Tìm products theo id
+	 
 	@Override
 	public Products selectById(Products t) {
 		Products products = new Products();
@@ -203,7 +205,8 @@ public class ProductsDAO implements DAOInterface<Products> {
 		}
 		return products;
 	}
-
+	
+	 //Tìm products theo name
 	@Override
 	public Products selectByName(Products t) {
 		Products products = new Products();
@@ -232,7 +235,16 @@ public class ProductsDAO implements DAOInterface<Products> {
 		}
 		return products;
 	}
-
+	// Tìm products theo tên
+	/*
+	 * CREATE PROCEDURE `fineProduct` (in name varchar(100))
+		BEGIN
+			select p.idProducts, p.nameProducts, p.price, p.amount, p.idCategoryDetail,cd.nameCategoryDetail, c.nameCategory
+		from products p, categorydetail cd, category c
+		where p.idCategoryDetail=cd.idCategoryDetail and cd.idcategory =c.idcategory 
+		and ( (p.nameproducts like concat('%',name, '%')) or (c.nameCategory  like concat('%',name, '%')) or (cd.nameCategoryDetail  like concat('%',name, '%'))) ;
+		END$$
+	 */
 	@Override
 	public ArrayList<Products> search(String value) {
 		List<Products> listProducts = new ArrayList<Products>();
@@ -240,7 +252,7 @@ public class ProductsDAO implements DAOInterface<Products> {
 			// Bước 1: tạo kết nối đến CSDL
 			Connection connection = JDBCUtil.getConnection();
 			// Bước 2: tạo đối tượng PreparedStatement
-			String mysql = "select * from products where nameProducts like concat('%',?, '%');";
+			String mysql = "call management_products.fineProduct('?');";
 			CallableStatement callStatement = (CallableStatement) connection.prepareCall(mysql);
 			callStatement.setString(1, value);
 			// Bước 3: thực thi câu lệnh sql
@@ -304,7 +316,16 @@ public class ProductsDAO implements DAOInterface<Products> {
 			Logger.getLogger(ProductsDAO.class.getName()).log(Level.SEVERE, null, e);
 		}
 	}
-
+	
+	// Tìm Products theo id CategoryDetail
+	/*
+	 * CREATE PROCEDURE `listProductsByCategoryDetail` (id int)
+		BEGIN
+			select p.idProducts, p.nameProducts, p.price, p.amount, p.idCategoryDetail, cd.nameCategoryDetail
+		from products p, categorydetail cd
+		where p.idCategoryDetail=cd.idCategoryDetail and p.idCategoryDetail = id;
+		END$$
+	 */
 	public ArrayList<Products> selectByIdCategoryDetail(CategoryDetail t) {
 		List<Products> listProducts = new ArrayList<Products>();
 		try {
@@ -334,7 +355,17 @@ public class ProductsDAO implements DAOInterface<Products> {
 		}
 		return (ArrayList<Products>) listProducts;
 	}
-
+	
+	// Tìm Products theo id Category
+	/*
+	 * CREATE PROCEDURE `listProductsByCategory` (id int)
+		BEGIN
+			select p.idProducts, p.nameProducts, p.price, p.amount, p.idCategoryDetail, cd.nameCategoryDetail, c.nameCategory
+		from products p, categorydetail cd, category c
+		where p.idCategoryDetail=cd.idCategoryDetail and cd.idCategory = c.idCategory and c.idCategory=id;
+		END$$
+	 */
+		
 	public ArrayList<Products> selectByIdCategory(Category t) {
 		List<Products> listProducts = new ArrayList<Products>();
 		try {
@@ -353,8 +384,6 @@ public class ProductsDAO implements DAOInterface<Products> {
 				Double price = resultSet.getDouble("price");
 				int amount = resultSet.getInt("amount");
 				int idCategoryDetail = resultSet.getInt("idCategoryDetail");
-				String nameCategoryDetail = resultSet.getString("nameCategoryDetail");
-				String nameCategory = resultSet.getString("nameCategory");
 				Products products = new Products(idProducts, nameProducts, price, amount, idCategoryDetail);
 				listProducts.add(products);
 			}
@@ -366,68 +395,29 @@ public class ProductsDAO implements DAOInterface<Products> {
 		return (ArrayList<Products>) listProducts;
 	}
 
+	// Hiện tất cả Products theo Category
 	public TreeMap<Category, ArrayList<Products>> mapProductsByCategory() {
 		Map<Category, ArrayList<Products>> mapCategory = new TreeMap<Category, ArrayList<Products>>();
-		try {
-			// Bước 1: tạo kết nối đến CSDL
-			Connection connection = JDBCUtil.getConnection();
-			// Bước 2: tạo đối tượng PreparedStatement
-			String mysql = "SELECT * FROM management_products.category;";
-			PreparedStatement preStatemnt = connection.prepareStatement(mysql);
-			// Bước 3: thực thi câu lệnh sql
-			ResultSet resultSet = preStatemnt.executeQuery();
-			// Bước 4: kiểm tra kết quả
-			while (resultSet.next()) {
-				int idCategory = resultSet.getInt("idCategory");
-				String nameCategory = resultSet.getString("nameCategory");
-				Category category = new Category(idCategory, nameCategory);
-				ArrayList<Products> listProducts = selectByIdCategory(category);
-				mapCategory.put(category, listProducts);
-			}
-//			Set<Category> setCategory = map.keySet();
-//			for (Category key : setCategory) {
-//				System.out.println(key.toString());
-//				ArrayList<Products> list = map.get(key);
-//				for (Products p : list) {
-//					System.out.println(p.toString());
-//				}
-//			}
-			// Bước 5: ngắt kết nối với database
-			JDBCUtil.closeConnection(connection);
-		} catch (SQLException e) {
-			Logger.getLogger(ProductsDAO.class.getName()).log(Level.SEVERE, null, e);
+		List<Category> listCategories= CategoryDAO.getInstance().selectAll();
+		for(Category category: listCategories) {
+			ArrayList<Products> listProducts = selectByIdCategory(category);
+			mapCategory.put(category, listProducts);
 		}
 		return (TreeMap<Category, ArrayList<Products>>) mapCategory;
 	}
 
+	 // Hiện tất cả Products theo CategoryDetail
 	public TreeMap<CategoryDetail, ArrayList<Products>> mapProductsByCategoryDetail() {
-		Map<CategoryDetail, ArrayList<Products>> map = new TreeMap<CategoryDetail, ArrayList<Products>>();
-		try {
-			// Bước 1: tạo kết nối đến CSDL
-			Connection connection = JDBCUtil.getConnection();
-			// Bước 2: tạo đối tượng PreparedStatement
-			String mysql = "SELECT * FROM management_products.categorydetail;";
-			PreparedStatement preStatemnt = connection.prepareStatement(mysql);
-			// Bước 3: thực thi câu lệnh sql
-			ResultSet resultSet = preStatemnt.executeQuery();
-			// Bước 4: kiểm tra kết quả
-			while (resultSet.next()) {
-				int idCategoryDetail = resultSet.getInt("idCategoryDetail");
-				String nameCategoryDetail = resultSet.getString("nameCategoryDetail");
-				int idCategory = resultSet.getInt("idCategory");
-				CategoryDetail categoryDetail = new CategoryDetail(idCategoryDetail, nameCategoryDetail, idCategory);
-				ArrayList<Products> listProducts = selectByIdCategoryDetail(categoryDetail);
-
-				map.put(categoryDetail, listProducts);
-			}
-			// Bước 5: ngắt kết nối với database
-			JDBCUtil.closeConnection(connection);
-		} catch (SQLException e) {
-			Logger.getLogger(ProductsDAO.class.getName()).log(Level.SEVERE, null, e);
+		Map<CategoryDetail, ArrayList<Products>> mapCategoryDetail = new TreeMap<CategoryDetail, ArrayList<Products>>();
+		List<CategoryDetail> listCategoryDetails = CategoryDetailDAO.getInstance().selectAll();
+		for(CategoryDetail categoryDetail : listCategoryDetails) {
+			List<Products> listProducts = selectByIdCategoryDetail(categoryDetail);
+			mapCategoryDetail.put(categoryDetail, (ArrayList<Products>) listProducts);
 		}
-		return (TreeMap<CategoryDetail, ArrayList<Products>>) map;
+		return (TreeMap<CategoryDetail, ArrayList<Products>>) mapCategoryDetail;
 	}
 
+	// Hiện tất cả Products theo Category và  CategoryDetail
 	public TreeMap<Category, TreeMap<CategoryDetail, ArrayList<Products>>> mapProducts() {
 		Map<Category, TreeMap<CategoryDetail, ArrayList<Products>>> mapCategory = 
 				new TreeMap<Category, TreeMap<CategoryDetail, ArrayList<Products>>>();

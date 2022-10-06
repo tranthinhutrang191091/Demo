@@ -131,14 +131,14 @@ public class CategoryDAO  implements DAOInterface<Category> {
 			// Bước 1: tạo kết nối đến CSDL
 			Connection connection = JDBCUtil.getConnection();
 			// Bước 2: tạo đối tượng PreparedStatement
-			String mysql = "SELECT idCategory as 'ID', nameCategory as 'CategoryName' FROM management_products.category;";
+			String mysql = "SELECT idCategory, nameCategory FROM management_products.category;";
 			PreparedStatement preStatemnt = connection.prepareStatement(mysql);
 			// Bước 3: thực thi câu lệnh sql
 			ResultSet resultSet = preStatemnt.executeQuery();
 			// Bước 4: kiểm tra kết quả
 			while (resultSet.next()) {
-				int idCategory = resultSet.getInt("ID");
-				String nameCategory = resultSet.getString("CategoryName");
+				int idCategory = resultSet.getInt("idCategory");
+				String nameCategory = resultSet.getString("nameCategory");
 				Category category = new Category(idCategory, nameCategory);
 				listCategory.add(category);
 			}
